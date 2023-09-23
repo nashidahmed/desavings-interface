@@ -1,4 +1,4 @@
-import ethers, { parseEther } from "ethers"
+import ethers, { formatEther, parseEther } from "ethers"
 import {
   Button,
   Card,
@@ -6,10 +6,18 @@ import {
   Field,
   Input,
   Select,
+  Spinner,
 } from "@ensdomains/thorin"
-import { useState } from "react"
-import { useContractWrite, usePrepareContractWrite } from "wagmi"
+import { useEffect, useState } from "react"
+import {
+  useAccount,
+  useContractWrite,
+  usePrepareContractWrite,
+  useWaitForTransaction,
+} from "wagmi"
+import { readContract } from "@wagmi/core"
 import IERC20 from "../../public/abis/IERC20.json"
+import savingsFactoryAbi from "../../public/abis/SavingsFactory.json"
 
 interface TokenDistribution {
   token: string
@@ -27,16 +35,37 @@ const savingsFactory = "0x94De9e2f793Dde63718C28Dfa2333A8dF41Bce7e"
 export default function create() {
   const newTokenDistribution = { token: "", distribution: "" }
 
-  const [whitelistToken, setWhitelistToken] = useState<string>()
+  const { address } = useAccount()
+  const [allowance, setAllowance] = useState<string>()
+  const [whitelistToken, setWhitelistToken] = useState<string>(
+    "0x07865c6E87B9F70255377e024ace6630C1Eaa37F"
+  )
   const [tokenDistribution, setTokenDistribution] = useState<
     TokenDistribution[]
   >([newTokenDistribution])
   const [amount, setAmount] = useState<string>("")
 
+  useEffect(() => {
+    getAllowance()
+  }, [address])
+
+  const getAllowance = async () => {
+    if (address) {
+      const allowance = await readContract({
+        address: LINK,
+        abi: IERC20,
+        functionName: "allowance",
+        args: [address, savingsFactory],
+      })
+      setAllowance(formatEther(allowance))
+    }
+  }
+
+  // Approve wagmi contract call
   const {
     config: approveConfig,
-    error: prepareError,
-    isError: isPrepareError,
+    error: approvePrepareError,
+    isError: isApprovePrepareError,
   } = usePrepareContractWrite({
     address: LINK,
     abi: IERC20,
@@ -44,7 +73,40 @@ export default function create() {
     args: [savingsFactory, parseEther(amount || "0")],
   })
 
-  const { error, isError, write: approve } = useContractWrite(approveConfig)
+  const {
+    error: approveError,
+    isError: isApproveError,
+    data: approveData,
+    write: approve,
+  } = useContractWrite(approveConfig)
+
+  const { isLoading: isApproveLoading, isSuccess: isApproveSuccess } =
+    useWaitForTransaction({
+      hash: approveData?.hash,
+    })
+
+  // Create wagmi contract call
+  const {
+    config: createConfig,
+    error: createPrepareError,
+    isError: isCreatePrepareError,
+  } = usePrepareContractWrite({
+    address: savingsFactory,
+    abi: savingsFactoryAbi,
+    functionName: "create",
+    args: [[whitelistToken], tokenDistribution, parseEther(amount || "0")],
+  })
+  const {
+    error: createError,
+    isError: isCreateError,
+    data: createData,
+    write: createWrite,
+  } = useContractWrite(createConfig)
+
+  const { isLoading: isCreateLoading, isSuccess: isCreateSuccess } =
+    useWaitForTransaction({
+      hash: createData?.hash,
+    })
 
   const handleChange = (
     event: React.ChangeEvent<HTMLInputElement>,
@@ -151,19 +213,41 @@ export default function create() {
             placeholder="Enter LINK amount..."
           />
         </div>
-
         <div className="flex flex-col items-center mt-4 gap-2">
-          <Button
-            width="fit"
-            onClick={approve}
-            disabled={isPrepareError || isError}
-          >
-            Approve LINK
-          </Button>
-          {(isPrepareError || isError) && (
-            <div className="text-center text-red-500">
-              Error: {(prepareError || error)?.message}
-            </div>
+          {amount && parseFloat(allowance as string) >= parseFloat(amount) ? (
+            <>
+              <Button
+                width="fit"
+                onClick={approve}
+                disabled={
+                  isCreatePrepareError || isCreateError || isCreateLoading
+                }
+              >
+                {isCreateLoading ? <Spinner /> : "Create Savings"}
+              </Button>
+              {(isCreatePrepareError || isCreateError) && (
+                <div className="text-center text-red-500">
+                  Error: {(createPrepareError || createError)?.message}
+                </div>
+              )}
+            </>
+          ) : (
+            <>
+              <Button
+                width="fit"
+                onClick={approve}
+                disabled={
+                  isApprovePrepareError || isApproveError || isApproveLoading
+                }
+              >
+                {isApproveLoading ? <Spinner /> : "Approve LINK"}
+              </Button>
+              {(isApprovePrepareError || isApproveError) && (
+                <div className="text-center text-red-500">
+                  Error: {(approvePrepareError || approveError)?.message}
+                </div>
+              )}
+            </>
           )}
         </div>
       </Card>

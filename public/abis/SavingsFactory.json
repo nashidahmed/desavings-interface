@@ -1,0 +1,130 @@
+[
+  {
+    "inputs": [
+      {
+        "internalType": "contract ISwapProxy",
+        "name": "_swapProxy",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "creator",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "savings",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address[]",
+        "name": "whitelistTokens",
+        "type": "address[]"
+      },
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "token",
+            "type": "address"
+          },
+          {
+            "internalType": "uint8",
+            "name": "distribution",
+            "type": "uint8"
+          }
+        ],
+        "indexed": false,
+        "internalType": "struct Savings.TokenDistribution[]",
+        "name": "tokenDistribution",
+        "type": "tuple[]"
+      }
+    ],
+    "name": "SavingsCreated",
+    "type": "event"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address[]",
+        "name": "_whitelistTokens",
+        "type": "address[]"
+      },
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "token",
+            "type": "address"
+          },
+          {
+            "internalType": "uint8",
+            "name": "distribution",
+            "type": "uint8"
+          }
+        ],
+        "internalType": "struct Savings.TokenDistribution[]",
+        "name": "_tokenDistribution",
+        "type": "tuple[]"
+      },
+      {
+        "internalType": "uint96",
+        "name": "amount",
+        "type": "uint96"
+      }
+    ],
+    "name": "create",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "link",
+    "outputs": [
+      {
+        "internalType": "contract LinkTokenInterface",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "owner",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "registrar",
+    "outputs": [
+      {
+        "internalType": "contract KeeperRegistrarInterface",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  }
+]
