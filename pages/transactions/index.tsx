@@ -1,5 +1,5 @@
 import { ApolloClient, InMemoryCache, gql } from "@apollo/client"
-import { Card } from "@ensdomains/thorin"
+import { Card, RecordItem, RightArrowSVG } from "@ensdomains/thorin"
 import { useEffect, useState } from "react"
 import { useAccount } from "wagmi"
 
@@ -64,7 +64,35 @@ export default function Transactions() {
       <header className="mt-12 text-xl">
         View transactions from your savings plan
       </header>
-      <Card className="my-8"></Card>
+      <Card className="my-8">
+        {savings ? (
+          savings.map((saving) => (
+            <Card key={saving.id}>
+              <div className="w-fit">
+                <RecordItem
+                  keyLabel="Savings"
+                  keySublabel="Address"
+                  value={saving.id}
+                >
+                  {saving.id}
+                </RecordItem>
+                <div className="my-4">
+                  <div className="mb-4">Token distribution</div>
+                  {saving.tokenDistribution.map(
+                    (td: { token: string; distribution: number }) => (
+                      <div key={td.token} className="flex gap-8 font-mono my-2">
+                        {td.token} <RightArrowSVG /> {td.distribution}%
+                      </div>
+                    )
+                  )}
+                </div>
+              </div>
+            </Card>
+          ))
+        ) : (
+          <div className=" text-center">No saving contracts to show</div>
+        )}
+      </Card>
     </>
   )
 }
