@@ -1,5 +1,12 @@
-import Layout from "../../components/Layout.tsx"
+import { Card } from "@ensdomains/thorin"
 
 export default function create() {
-  return <Layout heading="Create your automated savings plan"></Layout>
+  return (
+    <>
+      <header className="mt-12 mb-8 text-xl">
+        Create your automated savings plan
+      </header>
+      <Card>TEST</Card>
+    </>
+  )
 }
