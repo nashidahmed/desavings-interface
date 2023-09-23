@@ -18,11 +18,7 @@ import {
 import { readContract } from "@wagmi/core"
 import IERC20 from "../../public/abis/IERC20.json"
 import savingsFactoryAbi from "../../public/abis/SavingsFactory.json"
-
-interface TokenDistribution {
-  token: string
-  distribution: string
-}
+import { TokenDistribution } from "../../interfaces"
 
 const incomingTokens = [
   { value: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984", label: "UNI" },
