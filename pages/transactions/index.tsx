@@ -34,6 +34,10 @@ const tokens = {
     name: "ETH",
     decimals: 18,
   },
+  "0x326c977e6efc84e512bb9c30f76e30c160ed06fb": {
+    name: "LINK",
+    decimals: 18,
+  },
   "0x07865c6e87b9f70255377e024ace6630c1eaa37f": {
     name: "USDC",
     decimals: 6,
@@ -92,7 +96,7 @@ export default function Transactions() {
                   <div className="mb-4">Token distribution</div>
                   {saving.tokenDistribution.map((td: TokenDistribution) => (
                     <div key={td.token} className="flex gap-8 font-mono my-2">
-                      {tokens[td.token].name} <RightArrowSVG />{" "}
+                      {tokens[td.token]?.name} <RightArrowSVG />{" "}
                       {td.distribution}%
                     </div>
                   ))}
@@ -106,18 +110,18 @@ export default function Transactions() {
                     >
                       {`${formatUnits(
                         transaction.amountIn,
-                        tokens[transaction.tokenIn].decimals
+                        tokens[transaction.tokenIn]?.decimals
                       )}`}{" "}
-                      {tokens[transaction.tokenIn].name}
+                      {tokens[transaction.tokenIn]?.name}
                       <RightArrowSVG />
                       <div>
                         {transaction.outgoingTokens.map((amount) => (
                           <div key={amount.token}>
                             {`${formatUnits(
                               amount.amount,
-                              tokens[amount.token].decimals
+                              tokens[amount.token]?.decimals
                             )}`}{" "}
-                            {tokens[amount.token].name}
+                            {tokens[amount.token]?.name}
                           </div>
                         ))}
                       </div>

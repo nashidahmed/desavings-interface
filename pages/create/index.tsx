@@ -5,6 +5,7 @@ import {
   CrossCircleSVG,
   Field,
   Input,
+  PlusSVG,
   Select,
   Spinner,
 } from "@ensdomains/thorin"
@@ -23,19 +24,18 @@ import { TokenDistribution } from "../../interfaces"
 const incomingTokens = [
   { value: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984", label: "UNI" },
   { value: "0x07865c6E87B9F70255377e024ace6630C1Eaa37F", label: "USDC" },
+  { value: "0x326C977E6efc84E512bB9C30f76E30c160eD06FB", label: "LINK" },
 ]
 
 const LINK = "0x326C977E6efc84E512bB9C30f76E30c160eD06FB"
-const savingsFactory = "0x2e4E26C7df619ee29204B65327E781506f918a2A"
+const savingsFactory = "0xa02EC8B7785ABF2b559fC79819210e0EE605aA37"
 
 export default function create() {
   const newTokenDistribution = { token: "", distribution: "" }
 
   const { address } = useAccount()
   const [allowance, setAllowance] = useState<string>()
-  const [whitelistToken, setWhitelistToken] = useState<string>(
-    "0x07865c6E87B9F70255377e024ace6630C1Eaa37F"
-  )
+  const [whitelistTokens, setWhitelistTokens] = useState<string[]>([""])
   const [tokenDistribution, setTokenDistribution] = useState<
     TokenDistribution[]
   >([newTokenDistribution])
@@ -90,7 +90,7 @@ export default function create() {
     address: savingsFactory,
     abi: savingsFactoryAbi,
     functionName: "create",
-    args: [[whitelistToken], tokenDistribution, parseEther(amount || "0")],
+    args: [whitelistTokens, tokenDistribution, parseEther(amount || "0")],
   })
   const {
     error: createError,
@@ -103,6 +103,15 @@ export default function create() {
     useWaitForTransaction({
       hash: createData?.hash,
     })
+
+  const handleWhitelistTokenChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+    index: number
+  ) => {
+    const wl = [...whitelistTokens]
+    wl[index] = event.target.value
+    setWhitelistTokens(wl)
+  }
 
   const handleChange = (
     event: React.ChangeEvent<HTMLInputElement>,
@@ -130,20 +139,60 @@ export default function create() {
         Create your automated savings plan
       </header>
       <Card className="my-8">
-        <Select
-          autocomplete
+        <Field
           description="Select incoming tokens to trigger your Savings contract (ETH is by default an accepted incoming token)"
           label="Whitelisted incoming tokens"
-          options={incomingTokens}
-          onChange={(e) => setWhitelistToken(e.target.value)}
-          placeholder="Select tokens..."
-        />
+          labelSecondary={
+            <PlusSVG
+              className="cursor-pointer"
+              onClick={() => setWhitelistTokens([...whitelistTokens, ""])}
+            />
+          }
+        >
+          <>
+            {whitelistTokens.map((token, index) => (
+              <div className="flex items-center gap-2" key={index}>
+                <Select
+                  autocomplete
+                  label
+                  className="grow"
+                  options={incomingTokens}
+                  onChange={(e) => handleWhitelistTokenChange(e, index)}
+                  placeholder="Select incoming token..."
+                />
+
+                {whitelistTokens.length > 1 ? (
+                  <CrossCircleSVG
+                    onClick={() =>
+                      setWhitelistTokens([
+                        ...whitelistTokens.slice(0, index),
+                        ...whitelistTokens.slice(index + 1),
+                      ])
+                    }
+                  />
+                ) : (
+                  ""
+                )}
+              </div>
+            ))}
+          </>
+        </Field>
 
         <div className="my-6">
           <Field
             description="Set your preferred tokens in savings along with their distributions"
             label="Choose token distributions"
-            labelSecondary="Token split"
+            labelSecondary={
+              <PlusSVG
+                className="cursor-pointer font-xl"
+                onClick={() =>
+                  setTokenDistribution([
+                    ...tokenDistribution,
+                    newTokenDistribution,
+                  ])
+                }
+              />
+            }
           >
             <>
               {tokenDistribution &&
@@ -154,9 +203,15 @@ export default function create() {
                         autocomplete
                         label=""
                         name="token"
-                        options={incomingTokens}
+                        options={[
+                          {
+                            value: "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6",
+                            label: "ETH",
+                          },
+                          ...incomingTokens,
+                        ]}
                         onChange={(e) => handleChange(e, index)}
-                        placeholder="Select token..."
+                        placeholder="Select outgoing token..."
                       />
                     </div>
                     <div className="flex w-24">
@@ -169,35 +224,24 @@ export default function create() {
                       />
                     </div>
                     <div className="flex w-fit">
-                      <CrossCircleSVG
-                        onClick={() =>
-                          setTokenDistribution([
-                            ...tokenDistribution.slice(0, index),
-                            ...tokenDistribution.slice(index + 1),
-                          ])
-                        }
-                        className="cursor-pointer hover:"
-                      />
+                      {tokenDistribution.length > 1 ? (
+                        <CrossCircleSVG
+                          onClick={() =>
+                            setTokenDistribution([
+                              ...tokenDistribution.slice(0, index),
+                              ...tokenDistribution.slice(index + 1),
+                            ])
+                          }
+                          className="cursor-pointer hover:"
+                        />
+                      ) : (
+                        ""
+                      )}
                     </div>
                   </div>
                 ))}
             </>
           </Field>
-          <div className="flex justify-center">
-            <Button
-              width="fit"
-              className="mt-4"
-              colorStyle="accentSecondary"
-              onClick={() =>
-                setTokenDistribution([
-                  ...tokenDistribution,
-                  newTokenDistribution,
-                ])
-              }
-            >
-              Add new token
-            </Button>
-          </div>
         </div>
         <div className="my-2">
           <Input
@@ -237,7 +281,6 @@ export default function create() {
             </>
           ) : (
             <>
-              {amount}
               <Button
                 width="fit"
                 onClick={approve}
