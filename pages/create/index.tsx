@@ -28,7 +28,7 @@ const incomingTokens = [
 ]
 
 const LINK = "0x326C977E6efc84E512bB9C30f76E30c160eD06FB"
-const savingsFactory = "0xa02EC8B7785ABF2b559fC79819210e0EE605aA37"
+const savingsFactory = "0x2d91cE9E8D2Cc683b9Cb7ac59a6A688FEB8D66B9"
 
 export default function create() {
   const newTokenDistribution = { token: "", distribution: "" }
@@ -66,6 +66,7 @@ export default function create() {
     address: LINK,
     abi: IERC20,
     functionName: "approve",
+    enabled: false,
     args: [savingsFactory, parseEther(amount || "0")],
   })
 
@@ -257,13 +258,7 @@ export default function create() {
           {(amount && parseFloat(allowance as string) >= parseFloat(amount)) ||
           isApproveSuccess ? (
             <>
-              <Button
-                width="fit"
-                onClick={create}
-                disabled={
-                  isCreatePrepareError || isCreateError || isCreateLoading
-                }
-              >
+              <Button width="fit" onClick={create} disabled={isCreateLoading}>
                 {isCreateLoading ? (
                   <div className="flex justify-center gap-2">
                     Creating
@@ -273,11 +268,6 @@ export default function create() {
                   "Create Savings"
                 )}
               </Button>
-              {(isCreatePrepareError || isCreateError) && (
-                <div className="text-center text-red-500">
-                  Error: {(createPrepareError || createError)?.message}
-                </div>
-              )}
             </>
           ) : (
             <>

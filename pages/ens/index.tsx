@@ -1,13 +1,35 @@
 import { Button, Card, Input } from "@ensdomains/thorin"
 import { ENS } from "@ensdomains/ensjs"
 import { useEffect, useState } from "react"
-import { useAccount } from "wagmi"
+import { useAccount, useContractWrite, usePrepareContractWrite } from "wagmi"
 import { fetchEnsName } from "@wagmi/core"
+import ensAbi from "../../public/abis/ENS.json"
+import { ApolloClient, InMemoryCache, gql } from "@apollo/client"
+import { namehash } from "viem"
+
+const registryAddress = "0x114D4603199df73e7D157787f8778E21fCd13066"
+
+const ensQuery = `
+  query($name: String) {
+    domains(where: {name: $name}) {
+      id
+      name
+      labelName
+      labelhash
+    }
+  }
+`
 
 export default function ens() {
   const { address } = useAccount()
   const [ensName, setEnsName] = useState<string>()
   const [subname, setSubname] = useState<string>()
+  const [resolver, setResolver] = useState<string>()
+
+  const client = new ApolloClient({
+    uri: process.env.NEXT_PUBLIC_ENS_GRAPH_URL,
+    cache: new InMemoryCache(),
+  })
 
   useEffect(() => {
     getEnsName().then((ens: string | null) => {
@@ -15,7 +37,7 @@ export default function ens() {
         setEnsName(ens)
       }
     })
-  })
+  }, [address])
 
   const getEnsName = async () => {
     return await fetchEnsName({
@@ -23,11 +45,30 @@ export default function ens() {
     })
   }
 
-  const createSubdomain = async () => {
-    const ens: ENS = new ENS()
-    console.log(ens)
-    // await ens.name(ensName).createSubdomain(subname)
-  }
+  // Create wagmi contract call
+  const {
+    config,
+    error: prepareError,
+    isError: isPrepareError,
+  } = usePrepareContractWrite({
+    address: registryAddress,
+    abi: ensAbi,
+    functionName: "setSubnodeRecord",
+    enabled: false,
+    args: [
+      namehash(ensName || ""),
+      namehash(subname || ""),
+      address,
+      resolver,
+      0,
+    ],
+  })
+  const {
+    error: createError,
+    isError: isCreateError,
+    data,
+    write,
+  } = useContractWrite(config)
 
   return (
     <div className="w-fit">
@@ -41,7 +82,12 @@ export default function ens() {
           suffix={ensName ? `.${ensName}` : ""}
           onChange={(e) => setSubname(e.target.value)}
         />
-        <Button onClick={createSubdomain}>Create</Button>
+        <Input
+          label="Enter the subdomain record"
+          placeholder="0xA0Cf…251e"
+          onChange={(e) => setResolver(e.target.value)}
+        />
+        <Button onClick={() => write?.()}>Create</Button>
       </Card>
     </div>
   )

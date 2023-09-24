@@ -80,7 +80,7 @@ export default function Transactions() {
       <header className="mt-12 text-xl">
         View transactions from your savings plan
       </header>
-      <Card className="my-8">
+      <div className="grid gap-4 grid-cols-2 mt-8 mb-24">
         {savings ? (
           savings.map((saving) => (
             <Card key={saving.id}>
@@ -134,7 +134,7 @@ export default function Transactions() {
         ) : (
           <div className=" text-center">No saving contracts to show</div>
         )}
-      </Card>
+      </div>
     </>
   )
 }
