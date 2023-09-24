@@ -1,8 +1,8 @@
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app). This is the frontend for the DeSavings project which was developed for the ETHGlobal New York 2023 Hackathon held from Sep 22 - 24.
 
-[Link to the Solidity code](https://github.com/nashidahmed/desavings-core)
+# [Link to the Solidity code](https://github.com/nashidahmed/desavings-core)
 
-[Link to the Subgraph code](https://github.com/nashidahmed/desavings-graph)
+# [Link to the Subgraph code](https://github.com/nashidahmed/desavings-graph)
 
 ## Getting Started
 
