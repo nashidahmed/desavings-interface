@@ -2,6 +2,8 @@ import { ApolloClient, InMemoryCache, gql } from "@apollo/client"
 import { Card, RecordItem, RightArrowSVG } from "@ensdomains/thorin"
 import { useEffect, useState } from "react"
 import { useAccount } from "wagmi"
+import { Saving, TokenDistribution, Transaction } from "../../interfaces"
+import { formatUnits } from "ethers"
 
 const savingsQuery = `
   query($creator: String) {
@@ -11,53 +13,63 @@ const savingsQuery = `
         token
         distribution
       }
+      transactions {
+        tokenIn,
+        amountIn
+        outgoingTokens {
+          token
+          amount
+        }
+      }
     }
   }
 `
 
+const tokens = {
+  "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984": {
+    name: "UNI",
+    decimals: 18,
+  },
+  "0xb4fbf271143f4fbf7b91a5ded31805e42b2208d6": {
+    name: "ETH",
+    decimals: 18,
+  },
+  "0x07865c6e87b9f70255377e024ace6630c1eaa37f": {
+    name: "USDC",
+    decimals: 6,
+  },
+  "0x0000000000000000000000000000000000000000": {
+    name: "ETH",
+    decimals: 18,
+  },
+}
+
 export default function Transactions() {
   const { address } = useAccount()
-  const [savings, setSavings] = useState([
-    {
-      __typename: "Saving",
-      id: "0x5a1c568ff14efcd2b67471f5c8d87f4cdeafcdff",
-      tokenDistribution: [
-        {
-          __typename: "TokenDistribution",
-          token: "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984",
-          distribution: 20,
-        },
-        {
-          __typename: "TokenDistribution",
-          token: "0x07865c6e87b9f70255377e024ace6630c1eaa37f",
-          distribution: 80,
-        },
-      ],
-    },
-  ])
+  const [savings, setSavings] = useState<Saving[]>([])
 
   const client = new ApolloClient({
     uri: process.env.NEXT_PUBLIC_GRAPH_URL,
     cache: new InMemoryCache(),
   })
 
-  // useEffect(() => {
-  //   client
-  //     .query({
-  //       query: gql(savingsQuery),
-  //       variables: {
-  //         creator: address,
-  //       },
-  //     })
-  //     .then((data) => {
-  //       console.log(data.data.savings)
+  useEffect(() => {
+    client
+      .query({
+        query: gql(savingsQuery),
+        variables: {
+          creator: address,
+        },
+      })
+      .then((data) => {
+        console.log(data.data.savings)
 
-  //       setSavings(data.data.savings)
-  //     })
-  //     .catch((err) => {
-  //       console.log("Error fetching data: ", err)
-  //     })
-  // }, [address])
+        setSavings(data.data.savings)
+      })
+      .catch((err) => {
+        console.log("Error fetching data: ", err)
+      })
+  }, [address])
 
   return (
     <>
@@ -78,13 +90,39 @@ export default function Transactions() {
                 </RecordItem>
                 <div className="my-4">
                   <div className="mb-4">Token distribution</div>
-                  {saving.tokenDistribution.map(
-                    (td: { token: string; distribution: number }) => (
-                      <div key={td.token} className="flex gap-8 font-mono my-2">
-                        {td.token} <RightArrowSVG /> {td.distribution}%
+                  {saving.tokenDistribution.map((td: TokenDistribution) => (
+                    <div key={td.token} className="flex gap-8 font-mono my-2">
+                      {tokens[td.token].name} <RightArrowSVG />{" "}
+                      {td.distribution}%
+                    </div>
+                  ))}
+                </div>
+                <div className="my-4">
+                  <div className="mb-4 font-bold">Transactions</div>
+                  {saving.transactions.map((transaction: Transaction) => (
+                    <div
+                      key={transaction.id}
+                      className="flex gap-8 font-mono my-2"
+                    >
+                      {`${formatUnits(
+                        transaction.amountIn,
+                        tokens[transaction.tokenIn].decimals
+                      )}`}{" "}
+                      {tokens[transaction.tokenIn].name}
+                      <RightArrowSVG />
+                      <div>
+                        {transaction.outgoingTokens.map((amount) => (
+                          <div key={amount.token}>
+                            {`${formatUnits(
+                              amount.amount,
+                              tokens[amount.token].decimals
+                            )}`}{" "}
+                            {tokens[amount.token].name}
+                          </div>
+                        ))}
                       </div>
-                    )
-                  )}
+                    </div>
+                  ))}
                 </div>
               </div>
             </Card>

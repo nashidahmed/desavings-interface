@@ -26,7 +26,7 @@ const incomingTokens = [
 ]
 
 const LINK = "0x326C977E6efc84E512bB9C30f76E30c160eD06FB"
-const savingsFactory = "0x94De9e2f793Dde63718C28Dfa2333A8dF41Bce7e"
+const savingsFactory = "0x2e4E26C7df619ee29204B65327E781506f918a2A"
 
 export default function create() {
   const newTokenDistribution = { token: "", distribution: "" }
@@ -96,7 +96,7 @@ export default function create() {
     error: createError,
     isError: isCreateError,
     data: createData,
-    write: createWrite,
+    write: create,
   } = useContractWrite(createConfig)
 
   const { isLoading: isCreateLoading, isSuccess: isCreateSuccess } =
@@ -210,16 +210,24 @@ export default function create() {
           />
         </div>
         <div className="flex flex-col items-center mt-4 gap-2">
-          {amount && parseFloat(allowance as string) >= parseFloat(amount) ? (
+          {(amount && parseFloat(allowance as string) >= parseFloat(amount)) ||
+          isApproveSuccess ? (
             <>
               <Button
                 width="fit"
-                onClick={approve}
+                onClick={create}
                 disabled={
                   isCreatePrepareError || isCreateError || isCreateLoading
                 }
               >
-                {isCreateLoading ? <Spinner /> : "Create Savings"}
+                {isCreateLoading ? (
+                  <div className="flex justify-center gap-2">
+                    Creating
+                    <Spinner />
+                  </div>
+                ) : (
+                  "Create Savings"
+                )}
               </Button>
               {(isCreatePrepareError || isCreateError) && (
                 <div className="text-center text-red-500">
@@ -229,6 +237,7 @@ export default function create() {
             </>
           ) : (
             <>
+              {amount}
               <Button
                 width="fit"
                 onClick={approve}
@@ -236,7 +245,14 @@ export default function create() {
                   isApprovePrepareError || isApproveError || isApproveLoading
                 }
               >
-                {isApproveLoading ? <Spinner /> : "Approve LINK"}
+                {isApproveLoading ? (
+                  <div className="flex justify-center gap-2">
+                    Approving
+                    <Spinner />
+                  </div>
+                ) : (
+                  "Approve LINK"
+                )}
               </Button>
               {(isApprovePrepareError || isApproveError) && (
                 <div className="text-center text-red-500">
