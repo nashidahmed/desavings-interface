@@ -35,7 +35,9 @@ export default function create() {
 
   const { address } = useAccount()
   const [allowance, setAllowance] = useState<string>()
-  const [whitelistTokens, setWhitelistTokens] = useState<string[]>([""])
+  const [whitelistTokens, setWhitelistTokens] = useState<string[]>([
+    "0x07865c6E87B9F70255377e024ace6630C1Eaa37F",
+  ])
   const [tokenDistribution, setTokenDistribution] = useState<
     TokenDistribution[]
   >([newTokenDistribution])
@@ -66,8 +68,7 @@ export default function create() {
     address: LINK,
     abi: IERC20,
     functionName: "approve",
-    enabled: false,
-    args: [savingsFactory, parseEther(amount || "0")],
+    args: [savingsFactory || "", parseEther(amount || "0")],
   })
 
   const {
@@ -91,7 +92,11 @@ export default function create() {
     address: savingsFactory,
     abi: savingsFactoryAbi,
     functionName: "create",
-    args: [whitelistTokens, tokenDistribution, parseEther(amount || "0")],
+    args: [
+      whitelistTokens || [],
+      tokenDistribution || [],
+      parseEther(amount || "0"),
+    ],
   })
   const {
     error: createError,
@@ -271,13 +276,7 @@ export default function create() {
             </>
           ) : (
             <>
-              <Button
-                width="fit"
-                onClick={approve}
-                disabled={
-                  isApprovePrepareError || isApproveError || isApproveLoading
-                }
-              >
+              <Button width="fit" onClick={approve} disabled={isApproveLoading}>
                 {isApproveLoading ? (
                   <div className="flex justify-center gap-2">
                     Approving
@@ -287,11 +286,11 @@ export default function create() {
                   "Approve LINK"
                 )}
               </Button>
-              {(isApprovePrepareError || isApproveError) && (
+              {/* {(isApprovePrepareError || isApproveError) && (
                 <div className="text-center text-red-500">
                   Error: {(approvePrepareError || approveError)?.message}
                 </div>
-              )}
+              )} */}
             </>
           )}
         </div>

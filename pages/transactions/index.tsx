@@ -80,9 +80,9 @@ export default function Transactions() {
       <header className="mt-12 text-xl">
         View transactions from your savings plan
       </header>
-      <div className="grid gap-4 grid-cols-2 mt-8 mb-24">
-        {savings ? (
-          savings.map((saving) => (
+      {savings && savings.length ? (
+        savings.map((saving) => (
+          <div className="grid gap-4 grid-cols-2 mt-8 mb-24">
             <Card key={saving.id}>
               <div className="w-fit">
                 <RecordItem
@@ -130,11 +130,11 @@ export default function Transactions() {
                 </div>
               </div>
             </Card>
-          ))
-        ) : (
-          <div className=" text-center">No saving contracts to show</div>
-        )}
-      </div>
+          </div>
+        ))
+      ) : (
+        <div className="text-center text-lg mt-24">No contracts to show</div>
+      )}
     </>
   )
 }
