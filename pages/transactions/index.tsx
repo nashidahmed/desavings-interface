@@ -25,7 +25,7 @@ const savingsQuery = `
   }
 `
 
-const tokens = {
+const tokens: any = {
   "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984": {
     name: "UNI",
     decimals: 18,
@@ -80,9 +80,9 @@ export default function Transactions() {
       <header className="mt-12 text-xl">
         View transactions from your savings plan
       </header>
-      {savings && savings.length ? (
-        savings.map((saving) => (
-          <div className="grid gap-4 grid-cols-2 mt-8 mb-24">
+      <div className="grid gap-4 grid-cols-2 mt-8 mb-24">
+        {savings && savings.length ? (
+          savings.map((saving) => (
             <Card key={saving.id}>
               <div className="w-fit">
                 <RecordItem
@@ -130,11 +130,11 @@ export default function Transactions() {
                 </div>
               </div>
             </Card>
-          </div>
-        ))
-      ) : (
-        <div className="text-center text-lg mt-24">No contracts to show</div>
-      )}
+          ))
+        ) : (
+          <div className="text-center text-lg mt-24">No contracts to show</div>
+        )}
+      </div>
     </>
   )
 }

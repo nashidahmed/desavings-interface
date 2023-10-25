@@ -4,6 +4,17 @@ import { useEffect, useState } from "react"
 import { fetchEnsName } from "@wagmi/core"
 import { useAccount } from "wagmi"
 
+declare global {
+  namespace JSX {
+    interface IntrinsicElements {
+      "w3m-button": React.DetailedHTMLProps<
+        React.HTMLAttributes<HTMLElement>,
+        HTMLElement
+      >
+    }
+  }
+}
+
 export default function Header() {
   const { address } = useAccount()
   const [ensName, setEnsName] = useState<string>()
