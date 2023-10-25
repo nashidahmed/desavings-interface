@@ -1,4 +1,4 @@
-import ethers, { formatEther, parseEther } from "ethers"
+import ethers, { BigNumberish, formatEther, parseEther } from "ethers"
 import {
   Button,
   Card,
@@ -49,12 +49,12 @@ export default function create() {
 
   const getAllowance = async () => {
     if (address) {
-      const allowance = await readContract({
+      const allowance = (await readContract({
         address: LINK,
         abi: IERC20,
         functionName: "allowance",
         args: [address, savingsFactory],
-      })
+      })) as BigNumberish
       setAllowance(formatEther(allowance))
     }
   }
@@ -260,8 +260,7 @@ export default function create() {
           />
         </div>
         <div className="flex flex-col items-center mt-4 gap-2">
-          {(amount && parseFloat(allowance as string) >= parseFloat(amount)) ||
-          isApproveSuccess ? (
+          {isApproveSuccess ? (
             <>
               <Button width="fit" onClick={create} disabled={isCreateLoading}>
                 {isCreateLoading ? (
